@@ -1,25 +1,3 @@
-"""
-SHIELD — URL Analyzer Tool
-===========================
-Detects phishing and suspicious URLs in messages.
-
-How it works:
-    1. Extracts all URLs from the message text
-    2. Checks each URL against multiple red flag patterns:
-       - URL shorteners (bit.ly, tinyurl — hide the real destination)
-       - Bank name in non-official domain (sbi in bit.ly/sbi-kyc)
-       - Suspicious TLDs (.xyz, .top, .click — cheap domains scammers love)
-       - IP addresses instead of domain names (http://192.168.1.1/login)
-       - Missing HTTPS (no encryption = no trust)
-       - Misspelled bank domains (sbilbank.com vs sbibank.com)
-    3. Returns a score (0-100) and list of specific indicators found
-
-Why this matters:
-    80%+ of phishing SMS contain a malicious link. Catching the URL
-    alone can prevent most fraud. This tool runs in <1ms and gives
-    the LLM concrete evidence to work with.
-"""
-
 import re
 from typing import Optional
 
@@ -30,7 +8,6 @@ URL_SHORTENERS = [
     "ow.ly", "bl.ink", "soo.gd", "s.id", "rebrand.ly",
     "shorturl.at", "hyperurl.co",
 ]
-
 
 OFFICIAL_BANK_DOMAINS = {
     "sbi": ["sbi.co.in", "onlinesbi.sbi", "sbicard.com"],
@@ -51,14 +28,12 @@ OFFICIAL_BANK_DOMAINS = {
     "npci": ["npci.org.in"],
 }
 
-
 SUSPICIOUS_TLDS = [
     ".xyz", ".top", ".click", ".buzz", ".info", ".online",
     ".site", ".fun", ".club", ".live", ".work", ".loan",
     ".win", ".bid", ".stream", ".racing", ".download",
     ".icu", ".cam", ".rest",
 ]
-
 
 SUSPICIOUS_PATH_KEYWORDS = [
     "verify", "update", "confirm", "secure", "login",
@@ -68,19 +43,6 @@ SUSPICIOUS_PATH_KEYWORDS = [
 
 
 def analyze_urls(message: str) -> dict:
-    """
-    Analyze all URLs found in a message for phishing indicators.
-
-    Args:
-        message: The suspicious message text
-
-    Returns:
-        dict with:
-            - urls_found: number of URLs detected
-            - analyses: list of per-URL analysis results
-            - overall_risk: highest risk score across all URLs (0-100)
-            - summary: human-readable summary of findings
-    """
     urls = _extract_urls(message)
 
     if not urls:
@@ -112,7 +74,6 @@ def analyze_urls(message: str) -> dict:
 
 
 def _extract_urls(text: str) -> list[str]:
-    """Extract URLs from text, including partial URLs that scammers use."""
     standard = re.findall(
         r'https?://[^\s<>"\')\]]+',
         text, re.IGNORECASE,
@@ -126,16 +87,16 @@ def _extract_urls(text: str) -> list[str]:
     seen = set()
     urls = []
     for url in standard + no_protocol:
-        url_clean = url.rstrip(".,;:!?")  
-        if url_clean.lower() not in seen:
-            seen.add(url_clean.lower())
+        url_clean = url.rstrip(".,;:!?")
+        normalized = re.sub(r'^https?://', '', url_clean.lower())
+        if normalized not in seen:
+            seen.add(normalized)
             urls.append(url_clean)
 
     return urls
 
 
 def _analyze_single_url(url: str, full_message: str) -> dict:
-    """Analyze a single URL for phishing indicators."""
     url_lower = url.lower()
     risk_score = 0
     indicators = []
@@ -147,7 +108,7 @@ def _analyze_single_url(url: str, full_message: str) -> dict:
                 f"Banks never use shortened links in official messages."
             )
             risk_score += 40
-            break  
+            break
 
     matched_bank = _check_bank_name_abuse(url_lower)
     if matched_bank:
@@ -188,7 +149,6 @@ def _analyze_single_url(url: str, full_message: str) -> dict:
         )
         risk_score += 15
 
-
     domain_part = _extract_domain(url)
     if domain_part and domain_part.count(".") >= 3:
         indicators.append(
@@ -208,7 +168,6 @@ def _analyze_single_url(url: str, full_message: str) -> dict:
 
 
 def _check_bank_name_abuse(url_lower: str) -> Optional[str]:
-    """Check if a bank name appears in a non-official domain."""
     domain = _extract_domain(url_lower)
     if not domain:
         return None
@@ -226,7 +185,6 @@ def _check_bank_name_abuse(url_lower: str) -> Optional[str]:
 
 
 def _extract_domain(url: str) -> Optional[str]:
-    """Extract the domain from a URL."""
     domain = re.sub(r'^https?://', '', url.lower())
     domain = domain.split('/')[0]
     domain = domain.split(':')[0]
@@ -258,4 +216,4 @@ if __name__ == "__main__":
         for analysis in result["analyses"]:
             print(f"  URL: {analysis['url']}")
             for ind in analysis["indicators"]:
-                print(f"{ind}")
+                print(f"    > {ind}")

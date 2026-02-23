@@ -1,25 +1,3 @@
-"""
-SHIELD — Sender ID Verifier Tool
-==================================
-Verifies whether a message sender ID matches known legitimate bank/UPI sender codes.
-
-How it works:
-    1. Extracts sender ID from the message (if present) or takes it as input
-    2. Compares against a database of verified Indian bank sender IDs
-    3. Checks for typosquatting (SB1BNK vs SBIBNK — swapped characters)
-    4. Flags unknown or suspicious sender patterns
-
-Why this matters:
-    Scammers impersonate banks using sender IDs that look almost right.
-    "SB1-OTP" instead of "SBIBNK", or "HDFC-ALERTS" instead of "HDFCBK".
-    Most users don't notice the difference. This tool does.
-
-Indian bank SMS sender IDs follow a pattern:
-    - 6-character alphanumeric code (e.g., SBIBNK, HDFCBK)
-    - Sometimes prefixed with XX- or AD- (e.g., AD-SBIBNK)
-    - Transactional messages use different codes than promotional
-"""
-
 import re
 from difflib import SequenceMatcher
 from typing import Optional
@@ -128,22 +106,6 @@ for bank, info in LEGITIMATE_SENDERS.items():
 
 
 def verify_sender(message: str, sender_id: Optional[str] = None) -> dict:
-    """
-    Verify whether a sender ID is from a legitimate bank.
-
-    Args:
-        message: The full message text (used to extract sender if not provided)
-        sender_id: Optional explicit sender ID (e.g., "SBIBNK")
-
-    Returns:
-        dict with:
-            - sender_detected: the sender ID found (or None)
-            - is_verified: True if sender matches known legitimate bank
-            - bank_name: name of the matched bank (if verified)
-            - risk_score: 0-100 (0 = verified, 100 = definitely fake)
-            - indicators: list of specific concerns
-            - summary: human-readable explanation
-    """
     if not sender_id:
         sender_id = _extract_sender_id(message)
 
@@ -220,7 +182,7 @@ def verify_sender(message: str, sender_id: Optional[str] = None) -> dict:
         summary = f"UNVERIFIED: Sender '{sender_upper}' is not in our database. Exercise caution."
     else:
         summary = f"Sender '{sender_upper}' is unknown — not in our verified database."
-        risk_score = 20  
+        risk_score = 20
 
     return {
         "sender_detected": sender_upper,
@@ -233,15 +195,10 @@ def verify_sender(message: str, sender_id: Optional[str] = None) -> dict:
 
 
 def _extract_sender_id(message: str) -> Optional[str]:
-    """
-    Try to extract a sender ID from message text.
-    Indian bank SMS often has the sender ID in the message header or
-    is prefixed like "AD-SBIBNK" or "[SBIBNK]".
-    """
     patterns = [
-        r'^(?:AD|TD|TA|TM|VM|DM|SI)-([A-Z0-9]{4,8})',  # AD-SBIBNK
-        r'\[([A-Z0-9]{4,8})\]',                          # [SBIBNK]
-        r'^From:?\s*([A-Z0-9]{4,8})',                     # From: SBIBNK
+        r'^(?:AD|TD|TA|TM|VM|DM|SI)-([A-Z0-9]{4,8})',
+        r'\[([A-Z0-9]{4,8})\]',
+        r'^From:?\s*([A-Z0-9]{4,8})',
     ]
 
     for pattern in patterns:
@@ -253,7 +210,6 @@ def _extract_sender_id(message: str) -> Optional[str]:
 
 
 def _detect_bank_claim(message: str) -> Optional[str]:
-    """Detect if a message claims to be from a specific bank."""
     msg_lower = message.lower()
     bank_mentions = {
         "sbi": "State Bank of India",
@@ -276,7 +232,6 @@ def _detect_bank_claim(message: str) -> Optional[str]:
 
 
 def _detect_bank_in_sender(sender_id: str) -> Optional[str]:
-    """Check if a sender ID contains a known bank abbreviation."""
     sid_lower = sender_id.lower()
     for bank_name in LEGITIMATE_SENDERS.keys():
         if bank_name in sid_lower:
@@ -285,7 +240,6 @@ def _detect_bank_in_sender(sender_id: str) -> Optional[str]:
 
 
 def _find_closest_sender(sender_id: str) -> tuple[Optional[str], float]:
-    """Find the closest matching legitimate sender ID using string similarity."""
     best_match = None
     best_score = 0.0
 
@@ -301,16 +255,10 @@ def _find_closest_sender(sender_id: str) -> tuple[Optional[str], float]:
 if __name__ == "__main__":
     test_cases = [
         ("AD-SBIBNK: Your a/c XXX1234 credited Rs 5,000.", None),
-
-        ("", "SB1BNK"),  # 'I' replaced with '1'
-
-        ("Dear HDFC customer, your account will be blocked. "
-         "Update KYC now.", "HDFCAL"),
-
+        ("", "SB1BNK"),
+        ("Dear HDFC customer, your account will be blocked. Update KYC now.", "HDFCAL"),
         ("Dear SBI customer, click here to verify your account.", None),
-
         ("Your order has been shipped.", "AMZN01"),
-
         ("", "PAYTMB"),
     ]
 
@@ -325,4 +273,4 @@ if __name__ == "__main__":
         print(f"Risk: {result['risk_score']}/100")
         print(f"Summary: {result['summary']}")
         for ind in result["indicators"]:
-            print(f"  ⚠ {ind}")
+            print(f"  > {ind}")

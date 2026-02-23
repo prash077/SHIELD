@@ -1,27 +1,3 @@
-"""
-SHIELD — Urgency Manipulation Classifier
-==========================================
-Detects psychological pressure tactics used by scammers.
-
-How it works:
-    1. Scans message for urgency phrases in English, Hindi, and Telugu
-    2. Checks for PIN/OTP/CVV requests (ALWAYS fraud in unsolicited messages)
-    3. Detects fear-based manipulation (arrest, legal action, account freeze)
-    4. Detects greed-based manipulation (prize, reward, cashback)
-    5. Returns severity level and specific tactics identified
-
-Why this matters:
-    Every scam relies on ONE psychological trick: making the victim act
-    FAST before they think. "Your account will be blocked in 24 hours"
-    creates panic. "You've won Rs 50,000" creates greed. Both override
-    rational judgment. This tool catches these tactics in multiple languages.
-
-    The PIN/OTP check is the most critical: if an unsolicited message asks
-    for your UPI PIN, OTP, or CVV — it is ALWAYS fraud. No exceptions.
-    Banks will never ask for these via SMS or call.
-"""
-
-
 URGENCY_PATTERNS = {
     "english": [
         ("immediately", 30, "time_pressure"),
@@ -143,7 +119,6 @@ URGENCY_PATTERNS = {
     ],
 }
 
-
 PIN_OTP_PATTERNS = [
     "share your pin", "enter your pin", "send your pin",
     "share your otp", "send otp", "enter otp", "otp share",
@@ -152,36 +127,17 @@ PIN_OTP_PATTERNS = [
     "share password", "enter password", "send password",
     "share your upi pin", "enter upi pin",
     "mpin", "share mpin",
-
     "pin batayein", "pin bhejein", "pin share karein",
     "otp batayein", "otp bhejein", "otp share karein",
     "apna pin", "apna otp", "apna password",
     "gupt code", "guptank",
-
     "pin cheppandi", "otp cheppandi", "pin ivvandi",
 ]
-
 
 SENSITIVE_KEYWORDS = ["pin", "otp", "cvv", "mpin", "password", "passcode"]
 
 
 def classify_urgency(message: str) -> dict:
-    """
-    Analyze a message for urgency manipulation and sensitive data requests.
-
-    Args:
-        message: The suspicious message text
-
-    Returns:
-        dict with:
-            - urgency_detected: bool
-            - level: CRITICAL / HIGH / MEDIUM / LOW / NONE
-            - score: 0-100
-            - tactics_found: list of specific manipulation tactics
-            - pin_otp_requested: bool (if True, this is ALWAYS fraud)
-            - tactic_categories: dict of category -> count
-            - summary: human-readable explanation
-    """
     msg_lower = message.lower()
 
     pin_otp_requested = _check_pin_otp_request(msg_lower)
@@ -242,7 +198,6 @@ def classify_urgency(message: str) -> dict:
 
 
 def _check_pin_otp_request(msg_lower: str) -> bool:
-    """Check if the message requests PIN, OTP, CVV, or password."""
     for phrase in PIN_OTP_PATTERNS:
         if phrase in msg_lower:
             return True
@@ -265,13 +220,7 @@ def _check_pin_otp_request(msg_lower: str) -> bool:
     return False
 
 
-def _build_summary(
-    level: str,
-    pin_otp: bool,
-    tactics: list,
-    categories: dict,
-) -> str:
-    """Build a human-readable summary of the urgency analysis."""
+def _build_summary(level, pin_otp, tactics, categories):
     if level == "NONE":
         return "No urgency manipulation detected in this message."
 
@@ -327,9 +276,6 @@ if __name__ == "__main__":
         "Your SBI account XXX1234 has been credited with Rs 5,000 "
         "on 21-Feb-2026. Available balance: Rs 25,430.",
 
-        "Aapka OTP 483920 hai. Yeh OTP kisi ko mat batayein. "
-        "Kya aap apna OTP share karein?",
-
         "This is CBI calling. An arrest warrant has been issued "
         "against you for money laundering. Call this number immediately "
         "or face legal action within 2 hours.",
@@ -340,9 +286,9 @@ if __name__ == "__main__":
         print(f"\n{'='*60}")
         print(f"Message: {msg[:80]}...")
         print(f"Level: {result['level']} | Score: {result['score']}/100")
-        print(f"PIN/OTP Request: {'YES — ALWAYS FRAUD' if result['pin_otp_requested'] else 'No'}")
+        print(f"PIN/OTP Request: {'YES' if result['pin_otp_requested'] else 'No'}")
         print(f"Summary: {result['summary']}")
         if result["tactics_found"]:
             print(f"Tactics ({len(result['tactics_found'])}):")
-            for t in result["tactics_found"][:5]:  
-                print(f"  [{t['language']}] \"{t['phrase']}\" → {t['tactic']} (+{t['score']})")
+            for t in result["tactics_found"][:5]:
+                print(f"  [{t['language']}] \"{t['phrase']}\" -> {t['tactic']} (+{t['score']})")
