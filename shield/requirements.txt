@@ -1,0 +1,23 @@
+# SHIELD Dependencies
+# Install: pip install -r requirements.txt
+
+# === Core LLM Client ===
+openai>=1.12.0              # OpenAI-compatible client (works with Ollama + Lemonade)
+
+# === RAG Pipeline ===
+llama-index-core>=0.11.0    # Core RAG framework
+llama-index-readers-file>=0.2.0    # File readers for knowledge base
+llama-index-llms-openai-like>=0.2.0  # Connect LlamaIndex to Ollama/Lemonade
+llama-index-embeddings-huggingface>=0.3.0  # Local embeddings (no API needed)
+
+# === Input Processing ===
+easyocr>=1.7.0              # Screenshot OCR (Hindi/Telugu/English)
+
+# === Network Monitoring ===
+psutil>=5.9.0               # System/network monitoring
+
+# === Frontend ===
+streamlit>=1.31.0           # Web UI
+
+# === Utilities ===
+pydantic>=2.0               # Data validation for structured outputs

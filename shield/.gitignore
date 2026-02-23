@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Models (never commit these — they're huge)
+models/
+*.onnx
+*.bin
+*.safetensors
+*.gguf
+
+# Vector store / RAG index cache
+vector_store/
+chroma_db/
+storage/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# EasyOCR models (auto-downloaded)
+~/.EasyOCR/
+
+# Audio recordings
+*.wav
+*.mp3
+recordings/
+
+# Screenshots for testing (keep samples/ but not bulk)
+screenshots/
