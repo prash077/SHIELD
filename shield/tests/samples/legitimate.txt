@@ -1,0 +1,9 @@
+Your a/c no. XXXXXXX1234 is credited by Rs.5,000.00 on 21-Feb-26. Avl Bal Rs.25,430.50 -SBI
+---
+Rs 3,500.00 debited from a/c **1234 on 21-FEB-26 to VPA user@upi (UPI Ref No 402152834521). Avl bal: Rs 15,200.00 -HDFC
+---
+Your EMI of Rs 12,500 for loan account XXXXXXX5678 has been debited on 21-Feb-26. Next EMI due: 21-Mar-26. -ICICI
+---
+OTP for transaction at Amazon is 483920. Valid for 10 minutes. Do not share with anyone. -SBIBNK
+---
+Your FD of Rs 1,00,000 has been renewed for 365 days at 7.1% p.a. Maturity date: 21-Feb-27. -HDFCBK

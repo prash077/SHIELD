@@ -57,7 +57,7 @@ Voice/Text/Screenshot
 
 ```bash
 # Clone
-git clone https://github.com/YOUR_USERNAME/shield.git
+git clone https://github.com/prash077/SHIELD.git
 cd shield
 
 # Setup
@@ -89,7 +89,7 @@ streamlit run app.py
 
 ## Team
 
-Built by [Team Name] for AMD Slingshot 2026.
+Built by Crysis for AMD Slingshot 2026.
 
 ## License
 
